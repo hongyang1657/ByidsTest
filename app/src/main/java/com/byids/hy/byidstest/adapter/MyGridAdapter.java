@@ -7,8 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.byids.hy.byidstest.Bean.SwitchIcon;
+import com.byids.hy.byidstest.Bean.SwitchItem;
 import com.byids.hy.byidstest.R;
 
 import java.util.ArrayList;
@@ -21,9 +22,9 @@ public class MyGridAdapter extends BaseAdapter{
 
     private Context context;
     private LayoutInflater inflater;
-    private List<SwitchIcon> iconList = new ArrayList<>();
+    private List<SwitchItem> iconList = new ArrayList<>();
 
-    public MyGridAdapter(Context context,List<SwitchIcon> iconList) {
+    public MyGridAdapter(Context context,List<SwitchItem> iconList) {
         super();
         this.context = context;
         inflater = LayoutInflater.from(context);
@@ -52,16 +53,18 @@ public class MyGridAdapter extends BaseAdapter{
             convertView = inflater.inflate(R.layout.grid_item,null);
             holder = new ViewHolder();
             holder.imageView = (ImageView) convertView.findViewById(R.id.iv_icon);
+            holder.textView = (TextView) convertView.findViewById(R.id.tv_item_name);
             convertView.setTag(holder);
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
-        Log.i("result", "getView:------- "+iconList.get(position).getIconImageId());
         holder.imageView.setImageResource(iconList.get(position).getIconImageId());
+        holder.textView.setText(iconList.get(position).getItemName());
         return convertView;
     }
 
     class ViewHolder{
-        ImageView imageView;
+        private ImageView imageView;
+        private TextView textView;
     }
 }

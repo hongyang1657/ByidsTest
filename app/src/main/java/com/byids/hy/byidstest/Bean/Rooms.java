@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by asus on 2016/1/19.
  */
 public class Rooms implements Serializable {
-    private String roomAttr;
+    private RoomAttr roomAttr;
 
 
     private String roomName;
@@ -15,16 +15,12 @@ public class Rooms implements Serializable {
     private String roomDBName;
 
 
-    public void setRoomAttr(String roomAttr){
-
-        this.roomAttr = roomAttr;
-
+    public RoomAttr getRoomAttr() {
+        return roomAttr;
     }
 
-    public String getRoomAttr(){
-
-        return this.roomAttr ;
-
+    public void setRoomAttr(RoomAttr roomAttr) {
+        this.roomAttr = roomAttr;
     }
 
     public void setRoomName(String roomName){

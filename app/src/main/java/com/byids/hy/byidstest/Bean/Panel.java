@@ -1,14 +1,16 @@
 package com.byids.hy.byidstest.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by asus on 2016/1/19.
  */
-public class Panel {
+public class Panel implements Serializable{
 
     private String panel2;
 
 
-    private String active;
+    private int active;
 
 
     private String panel3;
@@ -35,13 +37,13 @@ public class Panel {
 
     }
 
-    public void setActive(String active){
+    public void setActive(int active){
 
         this.active = active;
 
     }
 
-    public String getActive(){
+    public int getActive(){
 
         return this.active;
 

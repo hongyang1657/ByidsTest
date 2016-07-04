@@ -1,11 +1,13 @@
 package com.byids.hy.byidstest.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by asus on 2016/1/19.
  */
-public class Curtain {
+public class Curtain implements Serializable {
 
-    private String active;
+    private int active;
 
 
     private String right;
@@ -17,13 +19,13 @@ public class Curtain {
     private String left;
 
 
-    public void setActive(String active){
+    public void setActive(int active){
 
         this.active = active;
 
     }
 
-    public String getActive(){
+    public int getActive(){
 
         return this.active;
 

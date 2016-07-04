@@ -1,10 +1,12 @@
 package com.byids.hy.byidstest.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by asus on 2016/1/19.
  */
-public class Hiddendoor {
-    private String active;
+public class Hiddendoor implements Serializable {
+    private int active;
 
 
     private String protocol;
@@ -22,13 +24,13 @@ public class Hiddendoor {
     private String ibeacon_uuid;
 
 
-    public void setActive(String active){
+    public void setActive(int active){
 
         this.active = active;
 
     }
 
-    public String getActive(){
+    public int getActive(){
 
         return this.active;
 

@@ -1,11 +1,13 @@
 package com.byids.hy.byidstest.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by asus on 2016/1/19.
  */
-public class RoomAttr {
-    private Panel panel;
+public class RoomAttr implements Serializable{
 
+    private Panel panel;
 
     private Aircondition aircondition;
 

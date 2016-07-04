@@ -1,14 +1,16 @@
 package com.byids.hy.byidstest.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by asus on 2016/1/19.
  */
-public class Camera {
+public class Camera implements Serializable {
 
     private String pub_domain;
 
 
-    private String active;
+    private int active;
 
 
     private String pri_ip;
@@ -32,13 +34,13 @@ public class Camera {
 
     }
 
-    public void setActive(String active){
+    public void setActive(int active){
 
         this.active = active;
 
     }
 
-    public String getActive(){
+    public int getActive(){
 
         return this.active;
 

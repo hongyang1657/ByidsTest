@@ -1,11 +1,13 @@
 package com.byids.hy.byidstest.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by asus on 2016/1/19.
  */
-public class Ibeacon {
+public class Ibeacon implements Serializable {
 
-    private String active;
+    private int active;
 
 
     private String minor;
@@ -17,13 +19,13 @@ public class Ibeacon {
     private String uuid;
 
 
-    public void setActive(String active){
+    public void setActive(int active){
 
         this.active = active;
 
     }
 
-    public String getActive(){
+    public int getActive(){
 
         return this.active;
 
