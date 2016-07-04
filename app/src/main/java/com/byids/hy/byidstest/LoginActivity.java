@@ -44,11 +44,17 @@ import com.byids.hy.byidstest.Bean.Rooms;
 import com.byids.hy.byidstest.Bean.Securityalarm;
 import com.byids.hy.byidstest.Bean.Sence;
 import com.byids.hy.byidstest.activity.MainActivity;
+import com.byids.hy.byidstest.utils.AES;
+import com.byids.hy.byidstest.utils.ByteUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -81,6 +87,12 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
     Rooms rs;
     List<Rooms> roomsList = new ArrayList<Rooms>();
     RoomAttr ra;
+
+    //---------------------------udp----------------------------
+    public static final int DEFAULT_PORT = 57816;//端口号
+    public static final String LOG_TAG = "WifiBroadcastActivity";
+    private byte[] buffer = new byte[MAX_DATA_PACKET_LENGTH];
+    private static final int MAX_DATA_PACKET_LENGTH = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,8 +178,117 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
         switch (view.getId()){
             case R.id.btn_goon:
                 viewPager.setCurrentItem(1);//切换到第二页
-
+                test();
+                break;
         }
+    }
+
+    //测试  包装发送udp
+    public void test(){
+
+        String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\"55f6797364c0ce976beb0110\",\"logname\":\"byids\"}}";
+
+        byte[] enByte = AES.encrpt(udpJson);//加密
+        if (enByte == null)
+            return;
+        byte[] lengthByte = ByteUtils.intToByteBigEndian(enByte.length);
+        byte[] headByte = new byte[8];
+        for (int i = 0;i<headByte.length;i++) {
+            headByte[i] = 0x50;
+        }
+        byte[] tailByte = new byte[4];
+        tailByte[0] = 0x0d;
+        tailByte[1] = 0x0a;
+        tailByte[2] = 0x0d;
+        tailByte[3] = 0x0a;
+
+        byte[] sendByte = ByteUtils.byteJoin(headByte,lengthByte,enByte,tailByte);
+        AES.byteStringLog(sendByte);
+        //发送udp广播
+        new BroadCastUdp(sendByte).start();
+    }
+
+    //发送UDP
+    public class BroadCastUdp extends Thread {
+        DatagramPacket dataPacket = null;
+        DatagramPacket receiveData= null;
+        private byte[] dataByte;
+        private DatagramSocket udpSocket;
+        public BroadCastUdp(byte[] sendByte) {
+            this.dataByte = sendByte;
+        }
+        public void run() {
+            try {
+                udpSocket = new DatagramSocket(DEFAULT_PORT);
+                dataPacket = new DatagramPacket(buffer, MAX_DATA_PACKET_LENGTH);
+                receiveData= new DatagramPacket(buffer,MAX_DATA_PACKET_LENGTH);
+                if (this.dataByte == null){
+                    return;
+                }
+                byte[] data = this.dataByte;
+                dataPacket.setData(data);
+                dataPacket.setLength(data.length);
+                dataPacket.setPort(DEFAULT_PORT);
+
+                InetAddress broadcastAddr;
+                broadcastAddr = InetAddress.getByName("255.255.255.255");
+                dataPacket.setAddress(broadcastAddr);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.toString());
+                udpSocket.close();
+            }
+            // while( start ){
+            try {
+                udpSocket.send(dataPacket);
+                sleep(10);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.toString());
+                udpSocket.close();
+            }
+            try {
+                udpSocket.receive(receiveData);
+                udpSocket.receive(receiveData);
+            } catch (Exception e) {
+// TODO Auto-generated catch block
+                Log.e(LOG_TAG, e.toString());
+                udpSocket.close();
+            }
+            if (null!=receiveData){
+
+                if( 0!=receiveData.getLength() ) {
+                    String codeString = new String( buffer, 0, receiveData.getLength() );
+
+                    Log.i("result", "接收到数据为: "+codeString);
+                    Log.i("result", "接收到数据为: "+codeString.substring(2,4));
+                    String udpCheck=codeString.substring(2,4);
+                    Log.i("result", "接收到数据为: "+udpCheck);
+                    Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
+                    Log.i("result","recivedata_sock地址为："+receiveData.getAddress());//此为IP加端口号
+
+                    /*
+                    7.4
+                     */
+
+//                Intent intent=new Intent();
+//                intent.putExtra("receiveData", receiveData.getAddress().toString().substring(1));
+                    System.out.println( "receiveData："+receiveData.getAddress().toString().substring(1) );
+                    String ip=receiveData.getAddress().toString().substring(1);
+
+//                tcpLongSocket=new TcpLongSocket(new receiveUdpSendTcp());
+//                tcpLongSocket.startConnect(receiveData.getAddress().toString().substring(1),DEFAULT_PORT);
+
+                }
+            }else{
+                try {
+                    udpSocket.send(dataPacket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            udpSocket.close();
+        }
+
     }
 
     //第二页点击事件
