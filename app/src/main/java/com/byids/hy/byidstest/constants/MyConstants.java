@@ -1,6 +1,7 @@
 package com.byids.hy.byidstest.constants;
 
 /**
+ *  常量类
  * Created by hy on 2016/7/4.
  */
 public class MyConstants {

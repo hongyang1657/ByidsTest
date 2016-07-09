@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,7 +94,8 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
     public static final String LOG_TAG = "WifiBroadcastActivity";
     private byte[] buffer = new byte[MAX_DATA_PACKET_LENGTH];
     private static final int MAX_DATA_PACKET_LENGTH = 100;
-
+    String udpCheck;
+    String ip;    //接收到的ip地址
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,8 +179,8 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
     public void tologin(View view){
         switch (view.getId()){
             case R.id.btn_goon:
-                viewPager.setCurrentItem(1);//切换到第二页
-                test();
+                viewPager.setCurrentItem(1);           //切换到第二页
+                test();        //测试udp
                 break;
         }
     }
@@ -219,7 +221,12 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
         }
         public void run() {
             try {
-                udpSocket = new DatagramSocket(DEFAULT_PORT);
+                //udpSocket = new DatagramSocket(DEFAULT_PORT);
+                if (udpSocket==null){
+                    udpSocket = new DatagramSocket(null);
+                    udpSocket.setReuseAddress(true);
+                    udpSocket.bind(new InetSocketAddress(DEFAULT_PORT));
+                }
                 dataPacket = new DatagramPacket(buffer, MAX_DATA_PACKET_LENGTH);
                 receiveData= new DatagramPacket(buffer,MAX_DATA_PACKET_LENGTH);
                 if (this.dataByte == null){
@@ -258,25 +265,17 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
                 if( 0!=receiveData.getLength() ) {
                     String codeString = new String( buffer, 0, receiveData.getLength() );
 
-                    Log.i("result", "接收到数据为: "+codeString);
+                    Log.i("result", "接收到数据为codeString: "+codeString);
                     Log.i("result", "接收到数据为: "+codeString.substring(2,4));
-                    String udpCheck=codeString.substring(2,4);
+                    udpCheck=codeString.substring(2,4);
                     Log.i("result", "接收到数据为: "+udpCheck);
                     Log.i("result","recivedataIP地址为："+receiveData.getAddress().toString().substring(1));//此为IP地址
                     Log.i("result","recivedata_sock地址为："+receiveData.getAddress());//此为IP加端口号
 
                     /*
-                    7.4
+                    7.4    连接udp，
                      */
-
-//                Intent intent=new Intent();
-//                intent.putExtra("receiveData", receiveData.getAddress().toString().substring(1));
-                    System.out.println( "receiveData："+receiveData.getAddress().toString().substring(1) );
-                    String ip=receiveData.getAddress().toString().substring(1);
-
-//                tcpLongSocket=new TcpLongSocket(new receiveUdpSendTcp());
-//                tcpLongSocket.startConnect(receiveData.getAddress().toString().substring(1),DEFAULT_PORT);
-
+                    ip=receiveData.getAddress().toString().substring(1);   //ip地址
                 }
             }else{
                 try {
@@ -303,6 +302,7 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
                     return;
                 }else {
                     postAndInitData();
+                    Log.i(TAG, "login: 能点击");
                 }
         }
     }
@@ -317,7 +317,7 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
             @Override
             public void onResponse(JSONObject response) {
                 Log.i(TAG, "onResponse:--- "+response.toString());
-                Toast.makeText(LoginActivity.this, "返回的json："+response.toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoginActivity.this, "返回的json："+response.toString(), Toast.LENGTH_SHORT).show();
                 doJsonParse(response.toString());
 
             }
@@ -442,14 +442,19 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
                 String roomName = roomsObj.getString("roomName");
                 roomNameList[i] = roomName;
             }
-
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("roomNameList",roomNameList);
             intent.putExtra("roomAttr",roomAttr);
+            intent.putExtra("uname",uname);
+            intent.putExtra("pwd",pwd);
+            if (udpCheck.equals("ip")) {
+                intent.putExtra("ip",ip);
+            }
             Bundle bundle = new Bundle();
             bundle.putSerializable("homeAttr",homeAttrBean);
             intent.putExtras(bundle);
             startActivity(intent);
+            finish();        //结束此activity，下一个activity返回时，直接退出
         } catch (JSONException e) {
             e.printStackTrace();
         }

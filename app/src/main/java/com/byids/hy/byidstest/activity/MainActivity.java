@@ -25,10 +25,18 @@ import android.widget.Toast;
 import com.byids.hy.byidstest.Bean.HomeAttr;
 import com.byids.hy.byidstest.Bean.SwitchItem;
 import com.byids.hy.byidstest.R;
+import com.byids.hy.byidstest.TCPLongSocketCallback;
+import com.byids.hy.byidstest.TcpLongSocket;
 import com.byids.hy.byidstest.adapter.MyGridAdapter;
 import com.byids.hy.byidstest.adapter.MyRecyclerAdapter;
 import com.byids.hy.byidstest.constants.MyConstants;
+import com.byids.hy.byidstest.utils.CommandJsonUtils;
+import com.byids.hy.byidstest.utils.Encrypt;
+import com.byids.hy.byidstest.utils.VibratorUtil;
 import com.byids.hy.byidstest.view.WheelView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +61,9 @@ public class MainActivity extends Activity{
     private HomeAttr homeAttr = new HomeAttr();
     private final int ACTIVE = 1;//家里是否有该功能的组件，有1，无0
     private final int INACTIVE = 0;
+    private String ip; //home  ip地址
+    private String uname;
+    private String pwd;
 
     private GridView gridView;
     private MyGridAdapter adapter;
@@ -69,14 +80,63 @@ public class MainActivity extends Activity{
     private RecyclerView recyclerView;
     private MyRecyclerAdapter myRecyclerAdapter;
 
+    //----------------socket---------------------
+    public static final int DEFAULT_PORT = 57816;
+    private TcpLongSocket tcplongSocket;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
+        uname = getIntent().getStringExtra("uname");
+        pwd = getIntent().getStringExtra("pwd");
+        ip=getIntent().getStringExtra("ip");
+        if (ip ==null) {
+            Toast.makeText(MainActivity.this, "找不到主机", Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(MainActivity.this, "找到主机", Toast.LENGTH_LONG).show();
+            tcplongSocket=new TcpLongSocket(new ConnectTcp());
+            tcplongSocket.startConnect(ip,DEFAULT_PORT);
+        }
         initData();
         initView();
 
+    }
+
+    private class ConnectTcp implements TCPLongSocketCallback {
+
+
+        @Override
+        public void connected() {
+            Log.i("MAIN", String.valueOf(tcplongSocket.getConnectStatus()));
+            VibratorUtil.Vibrate(MainActivity.this,300);
+            JSONObject checkCommandData=new JSONObject();
+            try {
+                checkCommandData.put("kong","keys");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String  checkJson= CommandJsonUtils.getCommandJson(1,checkCommandData,"55f6797364c0ce976beb0110",uname,pwd, String.valueOf(System.currentTimeMillis()));
+            Log.i("result","check"+checkJson);
+            tcplongSocket.writeDate(Encrypt.encrypt(checkJson));
+
+        }
+
+        @Override
+        public void receive(byte[] buffer) {
+            Log.i("收到数据","--------");
+            if("Hello client"==buffer.toString()){
+                Log.i("心跳", String.valueOf(tcplongSocket.getConnectStatus()));
+            }
+
+        }
+
+        @Override
+        public void disconnect() {
+            tcplongSocket.close();
+        }
     }
 
     private void initData() {
