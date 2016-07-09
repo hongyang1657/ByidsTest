@@ -180,16 +180,16 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
         switch (view.getId()){
             case R.id.btn_goon:
                 viewPager.setCurrentItem(1);           //切换到第二页
-                test();        //测试udp
+
                 break;
         }
     }
 
     //测试  包装发送udp
-    public void test(){
+    public void test(String hid){
 
-        String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\"55f6797364c0ce976beb0110\",\"logname\":\"byids\"}}";
-
+        String udpJson="{\"command\":\"find\",\"data\":{\"hid\":\""+hid+"\",\"loginName\":\"byids\"}}";
+        Log.i(TAG, "test: ------------------"+udpJson);
         byte[] enByte = AES.encrpt(udpJson);//加密
         if (enByte == null)
             return;
@@ -275,7 +275,7 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
                     /*
                     7.4    连接udp，
                      */
-                    ip=receiveData.getAddress().toString().substring(1);   //ip地址
+                    ip = receiveData.getAddress().toString().substring(1);   //ip地址
                 }
             }else{
                 try {
@@ -336,7 +336,15 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
         try {
             JSONObject obj1 = new JSONObject(jsonData);
             Iterator iterator = obj1.keys();
-            String hid = (String) iterator.next();//获取动态json的key值（hid）
+            String hid = (String) iterator.next();   //获取动态json的key值（hid）
+            test(hid);        //测试udp
+            //...sleep one second
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "doJsonParse: --------------------"+hid);
             JSONObject obj2 = obj1.getJSONObject(hid);
             String address = obj2.getString("address");//客户地址
             String comment = obj2.getString("comment");//注释
@@ -445,6 +453,7 @@ public class LoginActivity extends Activity implements SurfaceHolder.Callback{
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("roomNameList",roomNameList);
             intent.putExtra("roomAttr",roomAttr);
+            intent.putExtra("hid",hid);
             intent.putExtra("uname",uname);
             intent.putExtra("pwd",pwd);
             if (udpCheck.equals("ip")) {

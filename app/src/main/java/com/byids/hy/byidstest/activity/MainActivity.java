@@ -49,6 +49,7 @@ import java.util.Map;
  */
 public class MainActivity extends Activity{
     private Context mContext;
+    private int flag = 0;
 
     private final String KETING = "客厅";
     private final String CANTING = "餐厅";
@@ -64,6 +65,7 @@ public class MainActivity extends Activity{
     private String ip; //home  ip地址
     private String uname;
     private String pwd;
+    private String hid;
 
     private GridView gridView;
     private MyGridAdapter adapter;
@@ -91,6 +93,7 @@ public class MainActivity extends Activity{
         setContentView(R.layout.activity_main1);
         uname = getIntent().getStringExtra("uname");
         pwd = getIntent().getStringExtra("pwd");
+        hid = getIntent().getStringExtra("hid");
         ip=getIntent().getStringExtra("ip");
         if (ip ==null) {
             Toast.makeText(MainActivity.this, "找不到主机", Toast.LENGTH_LONG).show();
@@ -118,7 +121,7 @@ public class MainActivity extends Activity{
                 e.printStackTrace();
             }
 
-            String  checkJson= CommandJsonUtils.getCommandJson(1,checkCommandData,"55f6797364c0ce976beb0110",uname,pwd, String.valueOf(System.currentTimeMillis()));
+            String  checkJson = CommandJsonUtils.getCommandJson(1,checkCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
             Log.i("result","check"+checkJson);
             tcplongSocket.writeDate(Encrypt.encrypt(checkJson));
 
@@ -128,7 +131,7 @@ public class MainActivity extends Activity{
         public void receive(byte[] buffer) {
             Log.i("收到数据","--------");
             if("Hello client"==buffer.toString()){
-                Log.i("心跳", String.valueOf(tcplongSocket.getConnectStatus()));
+                Log.i("心跳", "心跳"+String.valueOf(tcplongSocket.getConnectStatus()));
             }
 
         }
@@ -478,6 +481,45 @@ public class MainActivity extends Activity{
                     break;
                 case MyConstants.KETINGLIGHT:
                     Toast.makeText(MainActivity.this, "客厅灯", Toast.LENGTH_SHORT).show();
+
+                    //测试控制灯
+                    if (flag == 0) {
+                        ivIcon.setImageResource(R.drawable.lights_on);
+                        JSONObject lightOnCommandData=new JSONObject();
+                        JSONObject controlData=new JSONObject();
+                        try {
+                            lightOnCommandData.put("controlProtocol","hdl");
+                            lightOnCommandData.put("machineName","light");
+                            lightOnCommandData.put("controlData",controlData);
+                            controlData.put("lightValue","100");
+                            controlData.put("isServerAUTO","0");
+                            lightOnCommandData.put("controlSence","all");
+                            lightOnCommandData.put("houseDBName","keting");
+                            String  lightJson=CommandJsonUtils.getCommandJson(0,lightOnCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
+                            tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        flag = 1;
+                    } else if (flag == 1) {
+                        ivIcon.setImageResource(R.drawable.lights_off);
+                        JSONObject lightOffCommandData=new JSONObject();
+                        JSONObject controlData=new JSONObject();
+                        try {
+                            lightOffCommandData.put("controlProtocol","hdl");
+                            lightOffCommandData.put("machineName","light");
+                            lightOffCommandData.put("controlData",controlData);
+                            controlData.put("lightValue","0");
+                            controlData.put("isServerAUTO","0");
+                            lightOffCommandData.put("controlSence","all");
+                            lightOffCommandData.put("houseDBName","keting");
+                            String  lightJson=CommandJsonUtils.getCommandJson(0,lightOffCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
+                            tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        flag = 0;
+                    }
                     break;
                 case MyConstants.KETINGLIGHTBELT:
                     Toast.makeText(MainActivity.this, "客厅灯带", Toast.LENGTH_SHORT).show();
