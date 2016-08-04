@@ -3,15 +3,11 @@ package com.byids.hy.byidstest.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -495,7 +491,7 @@ public class MainActivity extends Activity{
                             controlData.put("isServerAUTO","0");
                             lightOnCommandData.put("controlSence","all");
                             lightOnCommandData.put("houseDBName","keting");
-                            String  lightJson=CommandJsonUtils.getCommandJson(0,lightOnCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
+                            String lightJson = CommandJsonUtils.getCommandJson(0,lightOnCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
                             tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
                         } catch (JSONException e) {
                             e.printStackTrace();

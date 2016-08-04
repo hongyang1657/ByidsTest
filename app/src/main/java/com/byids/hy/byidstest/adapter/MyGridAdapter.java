@@ -34,7 +34,16 @@ public class MyGridAdapter extends BaseAdapter{
 
     @Override
     public int getCount() {
-        return iconList==null?0:iconList.size();
+        if (iconList==null){
+            return 0;
+        }else if (iconList.size()%3==0){
+            return iconList.size()+3;
+        }else if (iconList.size()%3==1){
+            return iconList.size()+5;
+        }else if (iconList.size()%3==2){
+            return iconList.size()+4;
+        }else return 0;
+
     }
 
     @Override
@@ -60,6 +69,8 @@ public class MyGridAdapter extends BaseAdapter{
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
+        Log.i("result", "getView:--------------- "+iconList.size());
+        Log.i("result", "getView:--------------------- "+position);
         holder.imageView.setImageResource(iconList.get(position).getIconImageId());
         holder.textView.setText(iconList.get(position).getItemName());
         if (position%2==0){
