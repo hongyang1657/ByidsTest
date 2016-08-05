@@ -367,7 +367,6 @@ public class MainActivity extends Activity{
             case KETING:
                 index = (int) roomMap.get(KETING);
                 getRoomsData(index,KETING);
-
                 Toast.makeText(MainActivity.this, KETING, Toast.LENGTH_SHORT).show();
                 break;
             case CANTING:
@@ -450,6 +449,44 @@ public class MainActivity extends Activity{
                     break;
                 case MyConstants.ALARMCLOCK:
                     Toast.makeText(MainActivity.this, "闹钟", Toast.LENGTH_SHORT).show();
+                    //测试控制灯
+                    if (flag == 0) {
+                        ivIcon.setImageResource(R.drawable.lights_on);
+                        JSONObject lightOnCommandData=new JSONObject();
+                        JSONObject controlData=new JSONObject();
+                        try {
+                            lightOnCommandData.put("controlProtocol","hdl");
+                            lightOnCommandData.put("machineName","light");
+                            lightOnCommandData.put("controlData",controlData);
+                            controlData.put("lightValue","100");
+                            controlData.put("isServerAUTO","0");
+                            lightOnCommandData.put("controlSence","all");
+                            lightOnCommandData.put("houseDBName","keting");
+                            String lightJson = CommandJsonUtils.getCommandJson(0,lightOnCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
+                            tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        flag = 1;
+                    } else if (flag == 1) {
+                        ivIcon.setImageResource(R.drawable.lights_off);
+                        JSONObject lightOffCommandData=new JSONObject();
+                        JSONObject controlData=new JSONObject();
+                        try {
+                            lightOffCommandData.put("controlProtocol","hdl");
+                            lightOffCommandData.put("machineName","light");
+                            lightOffCommandData.put("controlData",controlData);
+                            controlData.put("lightValue","0");
+                            controlData.put("isServerAUTO","0");
+                            lightOffCommandData.put("controlSence","all");
+                            lightOffCommandData.put("houseDBName","keting");
+                            String  lightJson=CommandJsonUtils.getCommandJson(0,lightOffCommandData,hid,uname,pwd, String.valueOf(System.currentTimeMillis()));
+                            tcplongSocket.writeDate(Encrypt.encrypt(lightJson));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        flag = 0;
+                    }
                     break;
                 case MyConstants.OUTDOORWATERFLOW:
                     Toast.makeText(MainActivity.this, "户外喷泉", Toast.LENGTH_SHORT).show();
